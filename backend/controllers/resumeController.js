@@ -1,40 +1,35 @@
-const AWS = require('aws-sdk');
-const multer = require('multer');
-const multerS3 = require('multer-s3');
-const User = require('../models/User');
+const {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
+const { Upload } = require("@aws-sdk/lib-storage");
+const multer = require("multer");
+const User = require("../models/User");
 
-// Configure AWS
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION || 'us-east-1'
+// Configure AWS S3 Client
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || "us-east-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
 
-// Configure multer for S3 upload
+// Configure multer for memory storage
 const upload = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: process.env.AWS_S3_BUCKET_NAME,
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: function (req, file, cb) {
-      // Create unique filename with user ID and timestamp
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, `resumes/${req.user.id}/${uniqueSuffix}-${file.originalname}`);
-    }
-  }),
+  storage: multer.memoryStorage(),
   fileFilter: function (req, file, cb) {
     // Only allow PDF files
-    if (file.mimetype === 'application/pdf') {
+    if (file.mimetype === "application/pdf") {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF files are allowed'), false);
+      cb(new Error("Only PDF files are allowed"), false);
     }
   },
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  }
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
 });
 
 // @desc    Upload resume to S3 and update user profile
@@ -43,51 +38,76 @@ const upload = multer({
 const uploadResume = async (req, res) => {
   try {
     // Use multer middleware
-    upload.single('resume')(req, res, async function (err) {
+    upload.single("resume")(req, res, async function (err) {
       if (err) {
-        console.error('Upload error:', err);
+        console.error("Upload error:", err);
         return res.status(400).json({
           success: false,
-          message: err.message || 'Error uploading file'
+          message: err.message || "Error uploading file",
         });
       }
 
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message: 'No file uploaded'
+          message: "No file uploaded",
         });
       }
 
       try {
+        // Create unique filename with user ID and timestamp
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        const key = `resumes/${req.user.id}/${uniqueSuffix}-${req.file.originalname}`;
+
+        // Upload to S3 using AWS SDK v3
+        const uploadParams = {
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: key,
+          Body: req.file.buffer,
+          ContentType: req.file.mimetype,
+          ACL: "public-read", // Make the object publicly readable
+          Metadata: {
+            userId: req.user.id,
+            originalName: req.file.originalname,
+          },
+        };
+
+        const parallelUploads3 = new Upload({
+          client: s3Client,
+          params: uploadParams,
+        });
+
+        const result = await parallelUploads3.done();
+        const resumeUrl = result.Location;
+
         // Update user's resume URL in database
         const user = await User.findByIdAndUpdate(
           req.user.id,
-          { resumeUrl: req.file.location },
-          { new: true, select: '-password' }
+          { resumeUrl: resumeUrl },
+          { new: true, select: "-password" }
         );
 
         res.status(200).json({
           success: true,
-          message: 'Resume uploaded successfully',
+          message: "Resume uploaded successfully",
           data: {
-            resumeUrl: req.file.location,
-            user: user
-          }
+            resumeUrl: resumeUrl,
+            user: user,
+          },
         });
-      } catch (dbError) {
-        console.error('Database update error:', dbError);
+      } catch (uploadError) {
+        console.error("S3 upload error:", uploadError);
         res.status(500).json({
           success: false,
-          message: 'Error updating user profile'
+          message: "Error uploading file to storage",
         });
       }
     });
   } catch (error) {
-    console.error('Resume upload error:', error);
+    console.error("Resume upload error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error during resume upload'
+      message: "Server error during resume upload",
     });
   }
 };
@@ -97,26 +117,26 @@ const uploadResume = async (req, res) => {
 // @access  Private
 const getResume = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('resumeUrl');
-    
+    const user = await User.findById(req.user.id).select("resumeUrl");
+
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     res.status(200).json({
       success: true,
       data: {
-        resumeUrl: user.resumeUrl
-      }
+        resumeUrl: user.resumeUrl,
+      },
     });
   } catch (error) {
-    console.error('Get resume error:', error);
+    console.error("Get resume error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching resume'
+      message: "Server error while fetching resume",
     });
   }
 };
@@ -127,11 +147,11 @@ const getResume = async (req, res) => {
 const deleteResume = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (!user || !user.resumeUrl) {
       return res.status(404).json({
         success: false,
-        message: 'No resume found to delete'
+        message: "No resume found to delete",
       });
     }
 
@@ -141,30 +161,28 @@ const deleteResume = async (req, res) => {
 
     // Delete from S3
     try {
-      await s3.deleteObject({
+      const deleteCommand = new DeleteObjectCommand({
         Bucket: process.env.AWS_S3_BUCKET_NAME,
-        Key: key
-      }).promise();
+        Key: key,
+      });
+      await s3Client.send(deleteCommand);
     } catch (s3Error) {
-      console.error('S3 deletion error:', s3Error);
+      console.error("S3 deletion error:", s3Error);
       // Continue with database update even if S3 deletion fails
     }
 
     // Update user's resume URL in database
-    await User.findByIdAndUpdate(
-      req.user.id,
-      { resumeUrl: null }
-    );
+    await User.findByIdAndUpdate(req.user.id, { resumeUrl: null });
 
     res.status(200).json({
       success: true,
-      message: 'Resume deleted successfully'
+      message: "Resume deleted successfully",
     });
   } catch (error) {
-    console.error('Delete resume error:', error);
+    console.error("Delete resume error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while deleting resume'
+      message: "Server error while deleting resume",
     });
   }
 };
@@ -172,5 +190,5 @@ const deleteResume = async (req, res) => {
 module.exports = {
   uploadResume,
   getResume,
-  deleteResume
+  deleteResume,
 };
