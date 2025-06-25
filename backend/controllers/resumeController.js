@@ -2,8 +2,10 @@ const {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } = require("@aws-sdk/client-s3");
 const { Upload } = require("@aws-sdk/lib-storage");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const multer = require("multer");
 const User = require("../models/User");
 
@@ -65,7 +67,6 @@ const uploadResume = async (req, res) => {
           Key: key,
           Body: req.file.buffer,
           ContentType: req.file.mimetype,
-          ACL: "public-read", // Make the object publicly readable
           Metadata: {
             userId: req.user.id,
             originalName: req.file.originalname,
@@ -78,20 +79,29 @@ const uploadResume = async (req, res) => {
         });
 
         const result = await parallelUploads3.done();
-        const resumeUrl = result.Location;
 
-        // Update user's resume URL in database
+        // Store the S3 key instead of the full URL for better security
+        // Update user's resume key in database
         const user = await User.findByIdAndUpdate(
           req.user.id,
-          { resumeUrl: resumeUrl },
+          { resumeUrl: key }, // Store the S3 key
           { new: true, select: "-password" }
         );
+
+        // Generate a signed URL for immediate access
+        const getObjectCommand = new GetObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: key,
+        });
+        const signedUrl = await getSignedUrl(s3Client, getObjectCommand, {
+          expiresIn: 3600,
+        }); // 1 hour
 
         res.status(200).json({
           success: true,
           message: "Resume uploaded successfully",
           data: {
-            resumeUrl: resumeUrl,
+            resumeUrl: signedUrl,
             user: user,
           },
         });
@@ -126,10 +136,27 @@ const getResume = async (req, res) => {
       });
     }
 
+    // If user has a resume, generate a signed URL
+    let signedUrl = null;
+    if (user.resumeUrl) {
+      try {
+        const getObjectCommand = new GetObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: user.resumeUrl, // This is now the S3 key
+        });
+        signedUrl = await getSignedUrl(s3Client, getObjectCommand, {
+          expiresIn: 3600,
+        }); // 1 hour
+      } catch (signError) {
+        console.error("Error generating signed URL:", signError);
+        // Continue without signed URL
+      }
+    }
+
     res.status(200).json({
       success: true,
       data: {
-        resumeUrl: user.resumeUrl,
+        resumeUrl: signedUrl,
       },
     });
   } catch (error) {
@@ -155,9 +182,8 @@ const deleteResume = async (req, res) => {
       });
     }
 
-    // Extract S3 key from URL
-    const url = new URL(user.resumeUrl);
-    const key = url.pathname.substring(1); // Remove leading slash
+    // user.resumeUrl now contains the S3 key directly
+    const key = user.resumeUrl;
 
     // Delete from S3
     try {
