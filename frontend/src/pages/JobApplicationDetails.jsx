@@ -235,6 +235,19 @@ const JobApplicationDetails = () => {
             {!isEditing ? (
               <>
                 <button
+                  onClick={() => {
+                    const jobDesc = job.jobDescription || "";
+                    navigate(
+                      `/resume-analyzer?jobDescription=${encodeURIComponent(
+                        jobDesc
+                      )}`
+                    );
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium"
+                >
+                  Analyze Resume
+                </button>
+                <button
                   onClick={() => setIsEditing(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
                 >

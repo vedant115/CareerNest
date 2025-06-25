@@ -23,12 +23,18 @@ const Navbar = () => {
             </Link>
 
             {isAuthenticated && (
-              <div className="ml-10">
+              <div className="ml-10 flex space-x-4">
                 <Link
                   to="/job-tracker"
                   className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-m font-medium"
                 >
                   Job Tracker
+                </Link>
+                <Link
+                  to="/resume-analyzer"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-m font-medium"
+                >
+                  AI Resume Analyzer
                 </Link>
               </div>
             )}

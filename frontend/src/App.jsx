@@ -17,6 +17,7 @@ import JobTracker from "./pages/JobTracker";
 import AddApplication from "./pages/AddApplication";
 import JobApplicationDetails from "./pages/JobApplicationDetails";
 import StatusPage from "./pages/StatusPage";
+import ResumeAnalyzer from "./pages/ResumeAnalyzer";
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
@@ -58,6 +59,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <JobTracker />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/resume-analyzer"
+        element={
+          <ProtectedRoute>
+            <ResumeAnalyzer />
           </ProtectedRoute>
         }
       />
