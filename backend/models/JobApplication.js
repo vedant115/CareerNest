@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const JobApplicationSchema = new mongoose.Schema(
   {
@@ -135,4 +135,4 @@ JobApplicationSchema.pre("findOneAndUpdate", async function (next) {
 // Index for better query performance
 JobApplicationSchema.index({ user: 1, createdAt: -1 });
 
-module.exports = mongoose.model("JobApplication", JobApplicationSchema);
+export default mongoose.model("JobApplication", JobApplicationSchema);

@@ -1,13 +1,13 @@
-const {
+import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
-} = require("@aws-sdk/client-s3");
-const { Upload } = require("@aws-sdk/lib-storage");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const multer = require("multer");
-const User = require("../models/User");
+} from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import multer from "multer";
+import User from "../models/User.js";
 
 // Configure AWS S3 Client
 const s3Client = new S3Client({
@@ -213,8 +213,4 @@ const deleteResume = async (req, res) => {
   }
 };
 
-module.exports = {
-  uploadResume,
-  getResume,
-  deleteResume,
-};
+export { uploadResume, getResume, deleteResume };

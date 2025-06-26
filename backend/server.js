@@ -1,11 +1,15 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const cookieParser = require("cookie-parser");
-const connectDB = require("./config/database");
+import express, { json, urlencoded } from "express";
+import cors from "cors";
+import { config } from "dotenv";
+import cookieParser from "cookie-parser";
+
+import connectDB from "./config/database.js";
+import authRoutes from "./routes/auth.js";
+import jobRoutes from "./routes/jobs.js";
+import resumeRoutes from "./routes/resume.js";
 
 // Load environment variables
-dotenv.config();
+config();
 
 // Connect to database
 connectDB();
@@ -22,8 +26,8 @@ app.use(
   })
 );
 app.use(cookieParser());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: false }));
+app.use(json({ limit: "10mb" }));
+app.use(urlencoded({ extended: false }));
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -32,9 +36,9 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/jobs", require("./routes/jobs"));
-app.use("/api/resume", require("./routes/resume"));
+app.use("/api/auth", authRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/resume", resumeRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
@@ -83,4 +87,4 @@ process.on("unhandledRejection", (err, promise) => {
   });
 });
 
-module.exports = app;
+export default app;

@@ -1,12 +1,12 @@
-const express = require('express');
-const {
+import express from "express";
+import {
   createJob,
   getJobs,
   getJob,
   updateJob,
-  deleteJob
-} = require('../controllers/jobsController');
-const auth = require('../middleware/auth');
+  deleteJob,
+} from "../controllers/jobsController.js";
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -16,26 +16,26 @@ router.use(auth);
 // @route   POST /api/jobs
 // @desc    Create a new job application
 // @access  Private
-router.post('/', createJob);
+router.post("/", createJob);
 
 // @route   GET /api/jobs
 // @desc    Get all job applications for authenticated user
 // @access  Private
-router.get('/', getJobs);
+router.get("/", getJobs);
 
 // @route   GET /api/jobs/:id
 // @desc    Get single job application by ID
 // @access  Private
-router.get('/:id', getJob);
+router.get("/:id", getJob);
 
 // @route   PUT /api/jobs/:id
 // @desc    Update job application
 // @access  Private
-router.put('/:id', updateJob);
+router.put("/:id", updateJob);
 
 // @route   DELETE /api/jobs/:id
 // @desc    Delete job application
 // @access  Private
-router.delete('/:id', deleteJob);
+router.delete("/:id", deleteJob);
 
-module.exports = router;
+export default router;

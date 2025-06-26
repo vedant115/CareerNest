@@ -1,4 +1,4 @@
-const JobApplication = require('../models/JobApplication');
+import JobApplication from "../models/JobApplication.js";
 
 // @desc    Create new job application
 // @route   POST /api/jobs
@@ -12,24 +12,26 @@ const createJob = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Job application created successfully',
-      data: jobApplication
+      message: "Job application created successfully",
+      data: jobApplication,
     });
   } catch (error) {
-    console.error('Create job error:', error);
-    
+    console.error("Create job error:", error);
+
     // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const message = Object.values(error.errors).map(val => val.message).join(', ');
+    if (error.name === "ValidationError") {
+      const message = Object.values(error.errors)
+        .map((val) => val.message)
+        .join(", ");
       return res.status(400).json({
         success: false,
-        message
+        message,
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Server error while creating job application'
+      message: "Server error while creating job application",
     });
   }
 };
@@ -41,18 +43,18 @@ const getJobs = async (req, res) => {
   try {
     const jobApplications = await JobApplication.find({ user: req.user.id })
       .sort({ createdAt: -1 })
-      .populate('user', 'name email');
+      .populate("user", "name email");
 
     res.status(200).json({
       success: true,
       count: jobApplications.length,
-      data: jobApplications
+      data: jobApplications,
     });
   } catch (error) {
-    console.error('Get jobs error:', error);
+    console.error("Get jobs error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching job applications'
+      message: "Server error while fetching job applications",
     });
   }
 };
@@ -62,13 +64,14 @@ const getJobs = async (req, res) => {
 // @access  Private
 const getJob = async (req, res) => {
   try {
-    const jobApplication = await JobApplication.findById(req.params.id)
-      .populate('user', 'name email');
+    const jobApplication = await JobApplication.findById(
+      req.params.id
+    ).populate("user", "name email");
 
     if (!jobApplication) {
       return res.status(404).json({
         success: false,
-        message: 'Job application not found'
+        message: "Job application not found",
       });
     }
 
@@ -76,28 +79,28 @@ const getJob = async (req, res) => {
     if (jobApplication.user._id.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
-        message: 'Not authorized to access this job application'
+        message: "Not authorized to access this job application",
       });
     }
 
     res.status(200).json({
       success: true,
-      data: jobApplication
+      data: jobApplication,
     });
   } catch (error) {
-    console.error('Get job error:', error);
-    
+    console.error("Get job error:", error);
+
     // Handle invalid ObjectId
-    if (error.name === 'CastError') {
+    if (error.name === "CastError") {
       return res.status(404).json({
         success: false,
-        message: 'Job application not found'
+        message: "Job application not found",
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Server error while fetching job application'
+      message: "Server error while fetching job application",
     });
   }
 };
@@ -112,7 +115,7 @@ const updateJob = async (req, res) => {
     if (!jobApplication) {
       return res.status(404).json({
         success: false,
-        message: 'Job application not found'
+        message: "Job application not found",
       });
     }
 
@@ -120,7 +123,7 @@ const updateJob = async (req, res) => {
     if (jobApplication.user.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
-        message: 'Not authorized to update this job application'
+        message: "Not authorized to update this job application",
       });
     }
 
@@ -129,38 +132,40 @@ const updateJob = async (req, res) => {
       req.body,
       {
         new: true,
-        runValidators: true
+        runValidators: true,
       }
     );
 
     res.status(200).json({
       success: true,
-      message: 'Job application updated successfully',
-      data: jobApplication
+      message: "Job application updated successfully",
+      data: jobApplication,
     });
   } catch (error) {
-    console.error('Update job error:', error);
-    
+    console.error("Update job error:", error);
+
     // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const message = Object.values(error.errors).map(val => val.message).join(', ');
+    if (error.name === "ValidationError") {
+      const message = Object.values(error.errors)
+        .map((val) => val.message)
+        .join(", ");
       return res.status(400).json({
         success: false,
-        message
+        message,
       });
     }
 
     // Handle invalid ObjectId
-    if (error.name === 'CastError') {
+    if (error.name === "CastError") {
       return res.status(404).json({
         success: false,
-        message: 'Job application not found'
+        message: "Job application not found",
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Server error while updating job application'
+      message: "Server error while updating job application",
     });
   }
 };
@@ -175,7 +180,7 @@ const deleteJob = async (req, res) => {
     if (!jobApplication) {
       return res.status(404).json({
         success: false,
-        message: 'Job application not found'
+        message: "Job application not found",
       });
     }
 
@@ -183,7 +188,7 @@ const deleteJob = async (req, res) => {
     if (jobApplication.user.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
-        message: 'Not authorized to delete this job application'
+        message: "Not authorized to delete this job application",
       });
     }
 
@@ -191,30 +196,24 @@ const deleteJob = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Job application deleted successfully'
+      message: "Job application deleted successfully",
     });
   } catch (error) {
-    console.error('Delete job error:', error);
-    
+    console.error("Delete job error:", error);
+
     // Handle invalid ObjectId
-    if (error.name === 'CastError') {
+    if (error.name === "CastError") {
       return res.status(404).json({
         success: false,
-        message: 'Job application not found'
+        message: "Job application not found",
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Server error while deleting job application'
+      message: "Server error while deleting job application",
     });
   }
 };
 
-module.exports = {
-  createJob,
-  getJobs,
-  getJob,
-  updateJob,
-  deleteJob
-};
+export { createJob, getJobs, getJob, updateJob, deleteJob };
