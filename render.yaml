@@ -3,6 +3,7 @@ services:
   - type: web
     name: careernest-backend
     env: node
+    plan: free
     buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
     envVars:
@@ -27,6 +28,7 @@ services:
   - type: web
     name: careernest-ai-service
     env: python
+    plan: free
     buildCommand: cd ai_microservices && pip install -r requirements.txt
     startCommand: cd ai_microservices && python services.py
     envVars:
@@ -39,6 +41,7 @@ services:
   - type: web
     name: careernest-frontend
     env: node
+    plan: free
     buildCommand: cd frontend && npm install && npm run build
     startCommand: cd frontend && npm run preview -- --port 10002
     envVars:
