@@ -9,10 +9,6 @@ import authRoutes from "./routes/auth.js";
 import jobRoutes from "./routes/jobs.js";
 import resumeRoutes from "./routes/resume.js";
 
-// Load environment variables
-console.log("Access Key:", process.env.AWS_ACCESS_KEY_ID);
-console.log("Secret Key:", process.env.AWS_SECRET_ACCESS_KEY);
-
 // Connect to database
 connectDB();
 

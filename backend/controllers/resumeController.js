@@ -12,9 +12,6 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import multer from "multer";
 import User from "../models/User.js";
 
-console.log("Access Key:", process.env.AWS_ACCESS_KEY_ID);
-console.log("Secret Key:", process.env.AWS_SECRET_ACCESS_KEY);
-
 // Configure AWS S3 Client
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || "us-east-1",
