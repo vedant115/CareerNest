@@ -43,7 +43,7 @@ services:
     env: node
     plan: free
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm run preview -- --port 10002
+    startCommand: cd frontend && npm run preview -- --port 10002 --host 0.0.0.0
     envVars:
       - key: VITE_API_URL
         value: https://careernest-backend.onrender.com/api
