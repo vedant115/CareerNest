@@ -18,6 +18,7 @@ import AddApplication from "./pages/AddApplication";
 import JobApplicationDetails from "./pages/JobApplicationDetails";
 import StatusPage from "./pages/StatusPage";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
+import AIPrep from "./pages/AIPrep";
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
@@ -67,6 +68,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ResumeAnalyzer />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-prep"
+        element={
+          <ProtectedRoute>
+            <AIPrep />
           </ProtectedRoute>
         }
       />

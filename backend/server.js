@@ -1,6 +1,7 @@
+import { config } from "dotenv";
+config();
 import express, { json, urlencoded } from "express";
 import cors from "cors";
-import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 
 import connectDB from "./config/database.js";
@@ -9,7 +10,8 @@ import jobRoutes from "./routes/jobs.js";
 import resumeRoutes from "./routes/resume.js";
 
 // Load environment variables
-config();
+console.log("Access Key:", process.env.AWS_ACCESS_KEY_ID);
+console.log("Secret Key:", process.env.AWS_SECRET_ACCESS_KEY);
 
 // Connect to database
 connectDB();

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Navbar from "../components/Navbar";
 import { resumeAPI } from "../utils/api";
-import { analyzeResume, checkResumeAnalyzerHealth } from "../utils/resumeAnalyzerAPI";
+import { analyzeResume, checkAIServicesHealth } from "../utils/aiServicesAPI";
 
 const ResumeAnalyzer = () => {
   const [searchParams] = useSearchParams();
@@ -10,7 +12,9 @@ const ResumeAnalyzer = () => {
 
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeUrl, setResumeUrl] = useState(null);
-  const [jobDescription, setJobDescription] = useState(prefilledJobDescription || "");
+  const [jobDescription, setJobDescription] = useState(
+    prefilledJobDescription || ""
+  );
   const [analysisType, setAnalysisType] = useState("general");
   const [analysis, setAnalysis] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,11 +29,11 @@ const ResumeAnalyzer = () => {
 
   const checkAPIHealth = async () => {
     try {
-      await checkResumeAnalyzerHealth();
+      await checkAIServicesHealth();
       setApiHealthy(true);
     } catch (error) {
       setApiHealthy(false);
-      console.error("Resume Analyzer API is not available:", error);
+      console.error("AI Services API is not available:", error);
     }
   };
 
@@ -89,7 +93,9 @@ const ResumeAnalyzer = () => {
     }
 
     if (!apiHealthy) {
-      setError("Resume Analyzer API is not available. Please make sure it's running on localhost:5000");
+      setError(
+        "AI Services API is not available. Please make sure it's running on localhost:3000"
+      );
       return;
     }
 
@@ -99,15 +105,22 @@ const ResumeAnalyzer = () => {
 
     try {
       let fileToAnalyze = resumeFile;
-      
+
       // If no file is selected but URL exists, we need to fetch the file
       if (!fileToAnalyze && resumeUrl) {
+        console.log("Fetching resume from URL:", resumeUrl);
         const response = await fetch(resumeUrl);
         const blob = await response.blob();
-        fileToAnalyze = new File([blob], "resume.pdf", { type: "application/pdf" });
+        fileToAnalyze = new File([blob], "resume.pdf", {
+          type: "application/pdf",
+        });
       }
 
-      const result = await analyzeResume(fileToAnalyze, jobDescription, analysisType);
+      const result = await analyzeResume(
+        fileToAnalyze,
+        jobDescription,
+        analysisType
+      );
       setAnalysis(result.analysis);
     } catch (error) {
       console.error("Error analyzing resume:", error);
@@ -134,16 +147,19 @@ const ResumeAnalyzer = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">AI Resume Analyzer</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            AI Resume Analyzer
+          </h1>
           <p className="mt-2 text-gray-600">
             Upload your resume and analyze it against job descriptions using AI
           </p>
           {!apiHealthy && (
             <div className="mt-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-md">
-              ⚠️ Resume Analyzer API is not available. Please make sure it's running on localhost:5000
+              ⚠️ AI Services API is not available. Please make sure it's running
+              on localhost:3000
             </div>
           )}
         </div>
@@ -152,15 +168,21 @@ const ResumeAnalyzer = () => {
           {/* Left Column - Resume Upload */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Resume</h2>
-              
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Your Resume
+              </h2>
+
               {resumeUrl ? (
                 <div className="space-y-4">
                   <div className="p-4 bg-green-50 border border-green-200 rounded-md">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-green-800">Resume uploaded</p>
-                        <p className="text-xs text-green-600">PDF file ready for analysis</p>
+                        <p className="text-sm font-medium text-green-800">
+                          Resume uploaded
+                        </p>
+                        <p className="text-xs text-green-600">
+                          PDF file ready for analysis
+                        </p>
                       </div>
                       <div className="flex space-x-2">
                         <a
@@ -180,7 +202,7 @@ const ResumeAnalyzer = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Upload New Resume
@@ -198,13 +220,25 @@ const ResumeAnalyzer = () => {
                 <div className="space-y-4">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <div className="space-y-2">
-                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 48 48"
+                      >
+                        <path
+                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
-                      <p className="text-sm text-gray-600">Upload your resume to get started</p>
+                      <p className="text-sm text-gray-600">
+                        Upload your resume to get started
+                      </p>
                     </div>
                   </div>
-                  
+
                   <input
                     type="file"
                     accept=".pdf"
@@ -212,7 +246,9 @@ const ResumeAnalyzer = () => {
                     disabled={uploading}
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
-                  <p className="text-xs text-gray-500">PDF files only, max 10MB</p>
+                  <p className="text-xs text-gray-500">
+                    PDF files only, max 10MB
+                  </p>
                 </div>
               )}
 
@@ -230,12 +266,17 @@ const ResumeAnalyzer = () => {
           {/* Right Column - Job Description and Analysis */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Job Description & Analysis</h2>
-              
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Job Description & Analysis
+              </h2>
+
               <div className="space-y-6">
                 {/* Job Description Input */}
                 <div>
-                  <label htmlFor="jobDescription" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="jobDescription"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Job Description
                   </label>
                   <textarea
@@ -250,7 +291,10 @@ const ResumeAnalyzer = () => {
 
                 {/* Analysis Type */}
                 <div>
-                  <label htmlFor="analysisType" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="analysisType"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Analysis Type
                   </label>
                   <select
@@ -292,11 +336,71 @@ const ResumeAnalyzer = () => {
                 {/* Analysis Results */}
                 {analysis && (
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Analysis Results</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">
+                      Analysis Results
+                    </h3>
                     <div className="p-4 bg-gray-50 border border-gray-200 rounded-md">
-                      <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono">
-                        {analysis}
-                      </pre>
+                      <div className="prose prose-sm max-w-none text-gray-700">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            // Custom styling for markdown elements
+                            h1: ({ children }) => (
+                              <h1 className="text-xl font-bold text-gray-900 mb-3">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-md font-medium text-gray-800 mb-2">
+                                {children}
+                              </h3>
+                            ),
+                            p: ({ children }) => (
+                              <p className="mb-2 text-gray-700">{children}</p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="list-disc list-inside mb-2 text-gray-700">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-decimal list-inside mb-2 text-gray-700">
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => (
+                              <li className="mb-1">{children}</li>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-semibold text-gray-900">
+                                {children}
+                              </strong>
+                            ),
+                            em: ({ children }) => (
+                              <em className="italic text-gray-800">
+                                {children}
+                              </em>
+                            ),
+                            code: ({ children }) => (
+                              <code className="bg-gray-200 px-1 py-0.5 rounded text-sm font-mono">
+                                {children}
+                              </code>
+                            ),
+                            pre: ({ children }) => (
+                              <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-sm font-mono">
+                                {children}
+                              </pre>
+                            ),
+                          }}
+                        >
+                          {analysis}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 )}

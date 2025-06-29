@@ -36,6 +36,12 @@ const Navbar = () => {
                 >
                   AI Resume Analyzer
                 </Link>
+                <Link
+                  to="/ai-prep"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-m font-medium"
+                >
+                  AI Prep
+                </Link>
               </div>
             )}
           </div>
