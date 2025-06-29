@@ -257,6 +257,6 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 3000))
     
     # Run in production mode if not in debug
-    debug_mode = True  # Enable debug mode to see errors
+    debug_mode = os.environ.get('NODE_ENV') != 'production'
 
     app.run(host='0.0.0.0', port=port, debug=debug_mode)
