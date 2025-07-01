@@ -181,7 +181,7 @@ const AddApplication = () => {
                 value={formData.location}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., San Francisco, CA"
+                placeholder="e.g., Bangalore, India"
               />
             </div>
 
@@ -240,7 +240,7 @@ const AddApplication = () => {
             {/* Salary */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Salary (USD)
+                Salary
               </label>
               <input
                 type="number"
@@ -310,7 +310,7 @@ const AddApplication = () => {
                     value={formData.contactPerson.phone}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="(555) 123-4567"
+                    placeholder="(91) 123-456-7890"
                   />
                 </div>
               </div>
