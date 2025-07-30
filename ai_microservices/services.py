@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+import sys
 import fitz
 import json
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -10,15 +11,69 @@ from langchain_core.messages import HumanMessage
 import requests
 from bs4 import BeautifulSoup
 
-# Try to import ChromaDB, use fallback if it fails
-try:
-    import chromadb
-    from chromadb.utils import embedding_functions
-    CHROMA_AVAILABLE = True
-except ImportError as e:
-    print(f"ChromaDB not available: {e}")
-    print("Using in-memory fallback for vector storage")
-    CHROMA_AVAILABLE = False
+# Windows SQLite fix for ChromaDB
+def fix_sqlite_windows():
+    """Fix SQLite DLL issues on Windows"""
+    if sys.platform.startswith('win'):
+        try:
+            # Try to fix SQLite path issues
+            import sqlite3
+            # Force reload of sqlite3 module
+            if hasattr(sqlite3, '_sqlite'):
+                del sqlite3._sqlite
+            return True
+        except Exception as e:
+            print(f"SQLite fix attempt failed: {e}")
+            return False
+    return True
+
+# Try to import ChromaDB with multiple fallback strategies
+CHROMA_AVAILABLE = False
+chroma_client = None
+
+def init_chromadb():
+    """Initialize ChromaDB with multiple fallback strategies"""
+    global CHROMA_AVAILABLE, chroma_client
+
+    # Try to fix SQLite issues on Windows first
+    if not fix_sqlite_windows():
+        print("SQLite fix failed, ChromaDB may not work")
+
+    try:
+        # Strategy 1: Try importing ChromaDB
+        import chromadb
+        from chromadb.config import Settings
+
+        # Strategy 2: Try different client configurations
+        try:
+            # For deployment environments (like Render)
+            chroma_client = chromadb.Client(Settings(
+                chroma_db_impl="duckdb+parquet",
+                persist_directory=None,  # In-memory for deployment
+                anonymized_telemetry=False
+            ))
+            CHROMA_AVAILABLE = True
+            print("ChromaDB initialized successfully (in-memory mode)")
+            return True
+
+        except Exception as e1:
+            try:
+                # Fallback: Simple client
+                chroma_client = chromadb.Client()
+                CHROMA_AVAILABLE = True
+                print("ChromaDB initialized successfully (simple mode)")
+                return True
+
+            except Exception as e2:
+                print(f"ChromaDB client initialization failed: {e1}, {e2}")
+                return False
+
+    except ImportError as e:
+        print(f"ChromaDB not available: {e}")
+        return False
+    except Exception as e:
+        print(f"ChromaDB initialization error: {e}")
+        return False
 
 # Load environment variables
 load_dotenv()
@@ -47,19 +102,11 @@ except Exception as e:
     print(f"Error with LangChain model: {e}")
     raise
 
-# Initialize Chroma client for RAG (with fallback)
-if CHROMA_AVAILABLE:
-    try:
-        chroma_client = chromadb.Client()
-        embedding_function = embedding_functions.DefaultEmbeddingFunction()
-    except Exception as e:
-        print(f"Failed to initialize ChromaDB: {e}")
-        CHROMA_AVAILABLE = False
-        chroma_client = None
-        embedding_function = None
-else:
+# Initialize ChromaDB with fallback strategies
+if not init_chromadb():
+    print("Using in-memory fallback for vector storage")
+    CHROMA_AVAILABLE = False
     chroma_client = None
-    embedding_function = None
 
 # In-memory storage fallback for company research
 company_research_storage = {}
@@ -364,15 +411,9 @@ def store_company_info_in_vector_db(company_name, company_info):
             # Use ChromaDB
             collection_name = "company_research"
             try:
-                collection = chroma_client.get_collection(
-                    name=collection_name,
-                    embedding_function=embedding_function
-                )
+                collection = chroma_client.get_collection(name=collection_name)
             except:
-                collection = chroma_client.create_collection(
-                    name=collection_name,
-                    embedding_function=embedding_function
-                )
+                collection = chroma_client.create_collection(name=collection_name)
 
             # Split company info into chunks for better retrieval
             chunks = company_info.split('\n\n')
@@ -405,10 +446,7 @@ def query_company_info(company_name, question):
         if CHROMA_AVAILABLE and chroma_client:
             # Use ChromaDB
             try:
-                collection = chroma_client.get_collection(
-                    name="company_research",
-                    embedding_function=embedding_function
-                )
+                collection = chroma_client.get_collection(name="company_research")
 
                 # Search for relevant information
                 results = collection.query(
