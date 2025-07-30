@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CareerNest Job Tracker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="title">
+        <span class="logo">CareerNest</span>
+        <span class="subtitle">Job Tracker</span>
+      </h1>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error" class="error hidden">
+      <p id="error-message"></p>
+    </div>
+
+    <!-- Success Message -->
+    <div id="success" class="success hidden">
+      <p id="success-message"></p>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="form-container hidden">
+      <h2 class="form-title">Sign in to CareerNest</h2>
+      <form id="login">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="Enter your password">
+        </div>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </form>
+    </div>
+
+    <!-- Job Application Form -->
+    <div id="job-form" class="form-container hidden">
+      <div class="user-info">
+        <span>Welcome, <span id="user-name"></span></span>
+        <button id="logout-btn" class="btn btn-secondary btn-sm">Logout</button>
+      </div>
+
+      <h2 class="form-title">Add Job Application</h2>
+      
+      <!-- Auto-fill Button -->
+      <div class="auto-fill-section">
+        <button id="auto-fill-btn" class="btn btn-secondary">
+          <span class="icon">🔄</span>
+          Auto Fill from Page
+        </button>
+        <p class="auto-fill-hint">Click to automatically fill job details from the current webpage</p>
+      </div>
+
+      <form id="job-application">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="company">Company *</label>
+            <input type="text" id="company" name="company" required placeholder="e.g., Google">
+          </div>
+          <div class="form-group">
+            <label for="position">Position Title *</label>
+            <input type="text" id="position" name="position" required placeholder="e.g., Software Engineer">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" placeholder="e.g., Bangalore, India">
+          </div>
+          <div class="form-group">
+            <label for="salary">Salary</label>
+            <input type="number" id="salary" name="salary" placeholder="e.g., 120000">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="jobUrl">Job URL</label>
+          <input type="url" id="jobUrl" name="jobUrl" placeholder="Job posting URL">
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            <option value="saved">Saved</option>
+            <option value="applied">Applied</option>
+            <option value="screen">Phone Screen</option>
+            <option value="interview">Interview</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+            <option value="ghosted">Ghosted</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="jobDescription">Job Description</label>
+          <textarea id="jobDescription" name="jobDescription" rows="4" placeholder="Paste the job description here..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Add any notes about this application..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Add Job Application</button>
+          <button type="button" id="clear-form" class="btn btn-secondary">Clear Form</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

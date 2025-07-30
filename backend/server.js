@@ -23,7 +23,10 @@ app.use(
             "https://careernest-frontend.onrender.com",
             "https://careernest-frontend-skyh.onrender.com",
           ]
-        : "http://localhost:5173",
+        : [
+            "http://localhost:5173",
+            /^chrome-extension:\/\/.*$/, // Allow Chrome extensions
+          ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
