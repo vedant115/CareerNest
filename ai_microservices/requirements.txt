@@ -3,3 +3,8 @@ flask-cors
 google-generativeai
 python-dotenv
 PyMuPDF
+langchain-google-genai
+langchain-core
+chromadb
+requests
+beautifulsoup4

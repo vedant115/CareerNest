@@ -93,9 +93,7 @@ const ResumeAnalyzer = () => {
     }
 
     if (!apiHealthy) {
-      setError(
-        "AI Services API is not available. Please make sure it's running on localhost:3000"
-      );
+      setError("AI Services API is not available.");
       return;
     }
 

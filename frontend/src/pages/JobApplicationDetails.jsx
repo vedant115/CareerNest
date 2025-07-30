@@ -248,6 +248,19 @@ const JobApplicationDetails = () => {
                   Analyze Resume
                 </button>
                 <button
+                  onClick={() => {
+                    const companyName = job.company || "";
+                    navigate(
+                      `/company-research?company=${encodeURIComponent(
+                        companyName
+                      )}`
+                    );
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium"
+                >
+                  Research Company
+                </button>
+                <button
                   onClick={() => setIsEditing(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
                 >

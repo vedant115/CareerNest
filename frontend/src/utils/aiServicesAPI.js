@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const AI_API_BASE_URL =
-  import.meta.env.VITE_AI_API_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_AI_API_URL || "http://localhost:10001/api";
 
 // Create axios instance for AI services
 const aiApi = axios.create({
@@ -52,6 +52,22 @@ export const generateInterviewQuestions = async (prepData) => {
     return response.data;
   } catch (error) {
     console.error("Interview questions generation error:", error);
+    throw error;
+  }
+};
+
+// Company research using RAG
+export const researchCompany = async (researchData) => {
+  try {
+    const response = await aiApi.post("/research-company", researchData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Company research error:", error);
     throw error;
   }
 };
